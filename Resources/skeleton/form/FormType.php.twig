@@ -13,7 +13,7 @@ class {{ form_class }} extends AbstractType
 {% endblock class_definition %}
 {
 {% block class_body %}
-    {% if fields|length > 0 %}
+    {% if metadata.fieldMappings|length > 0 or metadata.associationMappings > 0 -%}
     /**
      * @param FormBuilderInterface $builder
      * @param array $options
@@ -21,10 +21,22 @@ class {{ form_class }} extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-        {%- for field in fields %}
+        {%- for field in metadata.fieldMappings %}
+            {%- if
+                field.fieldName in metadata.identifier == false and
+                metadata.isIdentifierNatural == false
+            %}
 
-            ->add('{{ field }}')
+            ->add('{{ field.fieldName }}')
+            {%- endif -%}
         {%- endfor %}
+
+        {%- for field in metadata.associationMappings %}
+            {%- if field.type != 4 %}
+
+            ->add('{{ field.fieldName }}')
+            {%- endif -%}
+        {% endfor %}
 
         ;
     }
