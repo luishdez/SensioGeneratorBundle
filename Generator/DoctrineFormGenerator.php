@@ -75,7 +75,7 @@ class DoctrineFormGenerator extends Generator
         array_pop($parts);
 
         $this->renderFile('form/FormType.php.twig', $this->classPath, array(
-            'fields'           => $this->getFieldsFromMetadata($metadata),
+            'metadata'         => $metadata,
             'namespace'        => $bundle->getNamespace(),
             'entity_namespace' => implode('\\', $parts),
             'entity_class'     => $entityClass,
@@ -83,30 +83,5 @@ class DoctrineFormGenerator extends Generator
             'form_class'       => $this->className,
             'form_type_name'   => strtolower(str_replace('\\', '_', $bundle->getNamespace()).($parts ? '_' : '').implode('_', $parts).'_'.substr($this->className, 0, -4)),
         ));
-    }
-
-    /**
-     * Returns an array of fields. Fields can be both column fields and
-     * association fields.
-     *
-     * @param  ClassMetadataInfo $metadata
-     * @return array             $fields
-     */
-    private function getFieldsFromMetadata(ClassMetadataInfo $metadata)
-    {
-        $fields = (array) $metadata->fieldNames;
-
-        // Remove the primary key field if it's not managed manually
-        if (!$metadata->isIdentifierNatural()) {
-            $fields = array_diff($fields, $metadata->identifier);
-        }
-
-        foreach ($metadata->associationMappings as $fieldName => $relation) {
-            if ($relation['type'] !== ClassMetadataInfo::ONE_TO_MANY) {
-                $fields[] = $fieldName;
-            }
-        }
-
-        return $fields;
     }
 }
