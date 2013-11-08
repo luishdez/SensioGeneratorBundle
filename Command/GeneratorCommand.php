@@ -61,6 +61,12 @@ abstract class GeneratorCommand extends ContainerAwareCommand
         return $skeletonDirs;
     }
 
+    protected function getContextFilePath($file)
+    {
+        $dir = $this->getContainer()->get('kernel')->getRootdir();
+        return $dir.'/config/'.$file;
+    }
+
     protected function getDialogHelper()
     {
         $dialog = $this->getHelperSet()->get('dialog');

@@ -30,6 +30,7 @@ class DoctrineCrudGenerator extends Generator
     protected $metadata;
     protected $format;
     protected $actions;
+    protected $context;
 
     /**
      * Constructor.
@@ -50,10 +51,11 @@ class DoctrineCrudGenerator extends Generator
      * @param string            $format           The configuration format (xml, yaml, annotation)
      * @param string            $routePrefix      The route name prefix
      * @param array             $needWriteActions Wether or not to generate write actions
+     * @param array             $context          Context extra data passwd to twig
      *
      * @throws \RuntimeException
      */
-    public function generate(BundleInterface $bundle, $entity, ClassMetadataInfo $metadata, $format, $routePrefix, $needWriteActions, $forceOverwrite)
+    public function generate(BundleInterface $bundle, $entity, ClassMetadataInfo $metadata, $format, $routePrefix, $needWriteActions, $forceOverwrite, $context)
     {
         $this->routePrefix = $routePrefix;
         $this->routeNamePrefix = str_replace('/', '_', $routePrefix);
@@ -70,6 +72,7 @@ class DoctrineCrudGenerator extends Generator
         $this->entity   = $entity;
         $this->bundle   = $bundle;
         $this->metadata = $metadata;
+        $this->context  = $context;
         $this->setFormat($format);
 
         $this->generateControllerClass($forceOverwrite);
@@ -141,6 +144,7 @@ class DoctrineCrudGenerator extends Generator
             'route_name_prefix' => $this->routeNamePrefix,
             'bundle'            => $this->bundle->getName(),
             'entity'            => $this->entity,
+            'context'           => $this->context,
         ));
     }
 
@@ -177,6 +181,7 @@ class DoctrineCrudGenerator extends Generator
             'namespace'         => $this->bundle->getNamespace(),
             'entity_namespace'  => $entityNamespace,
             'format'            => $this->format,
+            'context'           => $this->context,
         ));
     }
 
@@ -202,6 +207,7 @@ class DoctrineCrudGenerator extends Generator
             'namespace'         => $this->bundle->getNamespace(),
             'entity_namespace'  => $entityNamespace,
             'actions'           => $this->actions,
+            'context'           => $this->context,
             'form_type_name'    => strtolower(str_replace('\\', '_', $this->bundle->getNamespace()).($parts ? '_' : '').implode('_', $parts).'_'.$entityClass.'Type'),
         ));
     }
@@ -221,6 +227,7 @@ class DoctrineCrudGenerator extends Generator
             'record_actions'    => $this->getRecordActions(),
             'route_prefix'      => $this->routePrefix,
             'route_name_prefix' => $this->routeNamePrefix,
+            'context'           => $this->context,
         ));
     }
 
@@ -238,6 +245,7 @@ class DoctrineCrudGenerator extends Generator
             'actions'           => $this->actions,
             'route_prefix'      => $this->routePrefix,
             'route_name_prefix' => $this->routeNamePrefix,
+            'context'           => $this->context,
         ));
     }
 
@@ -254,6 +262,7 @@ class DoctrineCrudGenerator extends Generator
             'route_prefix'      => $this->routePrefix,
             'route_name_prefix' => $this->routeNamePrefix,
             'actions'           => $this->actions,
+            'context'           => $this->context,
         ));
     }
 
@@ -270,6 +279,7 @@ class DoctrineCrudGenerator extends Generator
             'entity'            => $this->entity,
             'bundle'            => $this->bundle->getName(),
             'actions'           => $this->actions,
+            'context'           => $this->context,
         ));
     }
 

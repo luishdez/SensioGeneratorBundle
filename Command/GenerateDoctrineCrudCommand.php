@@ -17,6 +17,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Component\Yaml\Yaml;
 use Sensio\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
 use Sensio\Bundle\GeneratorBundle\Generator\DoctrineCrudGenerator;
 use Sensio\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
@@ -43,6 +44,7 @@ class GenerateDoctrineCrudCommand extends GenerateDoctrineCommand
                 new InputOption('with-write', '', InputOption::VALUE_NONE, 'Whether or not to generate create, new and delete actions'),
                 new InputOption('format', '', InputOption::VALUE_REQUIRED, 'Use the format for configuration files (php, xml, yml, or annotation)', 'annotation'),
                 new InputOption('overwrite', '', InputOption::VALUE_NONE, 'Do not stop the generation if crud controller already exist, thus overwriting all generated files'),
+                new InputOption('context-file', '', InputOption::VALUE_OPTIONAL, 'Loads a yml file that will be passed to twig as context'),
             ))
             ->setDescription('Generates a CRUD based on a Doctrine entity')
             ->setHelp(<<<EOT
@@ -68,6 +70,11 @@ __project_root__/app/Resources/SensioGeneratorBundle/skeleton/form</info>
 
 You can check https://github.com/sensio/SensioGeneratorBundle/tree/master/Resources/skeleton
 in order to know the file structure of the skeleton
+
+context-file allows to load an options file that will be passed to twig as context. This is usefull if you are using custom setSkeletonDirs. This file should be located in:
+
+<info>BUNDLE_PATH/Config/
+APP_PATH/Config/</info>
 EOT
             )
             ->setName('doctrine:generate:crud')
@@ -97,6 +104,8 @@ EOT
         $prefix = $this->getRoutePrefix($input, $entity);
         $withWrite = $input->getOption('with-write');
         $forceOverwrite = $input->getOption('overwrite');
+        $contextFile = $input->getOption('context-file');
+        $contextData = false;
 
         $dialog->writeSection($output, 'CRUD generation');
 
@@ -104,8 +113,13 @@ EOT
         $metadata    = $this->getEntityMetadata($entityClass);
         $bundle      = $this->getContainer()->get('kernel')->getBundle($bundle);
 
+        if ($contextFile) {
+            $contextFile = $this->getContextFilePath($contextFile);
+            $contextData = Yaml::parse($contextFile);
+        }
+
         $generator = $this->getGenerator($bundle);
-        $generator->generate($bundle, $entity, $metadata[0], $format, $prefix, $withWrite, $forceOverwrite);
+        $generator->generate($bundle, $entity, $metadata[0], $format, $prefix, $withWrite, $forceOverwrite, $contextData);
 
         $output->writeln('Generating the CRUD code: <info>OK</info>');
 
