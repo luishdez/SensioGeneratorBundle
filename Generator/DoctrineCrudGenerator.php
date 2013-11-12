@@ -30,6 +30,7 @@ class DoctrineCrudGenerator extends Generator
     protected $metadata;
     protected $format;
     protected $actions;
+    protected $savePath;
     protected $context;
 
     /**
@@ -51,12 +52,22 @@ class DoctrineCrudGenerator extends Generator
      * @param string            $format           The configuration format (xml, yaml, annotation)
      * @param string            $routePrefix      The route name prefix
      * @param array             $needWriteActions Wether or not to generate write actions
-     * @param array             $context          Context extra data passwd to twig
+     * @param string            $savePath         Extra save path where controller will be stored
+     * @param string            $context          Context extra data passwd to twig
      *
      * @throws \RuntimeException
      */
-    public function generate(BundleInterface $bundle, $entity, ClassMetadataInfo $metadata, $format, $routePrefix, $needWriteActions, $forceOverwrite, $context)
-    {
+    public function generate(
+        BundleInterface $bundle,
+        $entity,
+        ClassMetadataInfo $metadata,
+        $format,
+        $routePrefix,
+        $needWriteActions,
+        $forceOverwrite,
+        $savePath = '',
+        $context = false
+    ) {
         $this->routePrefix = $routePrefix;
         $this->routeNamePrefix = str_replace('/', '_', $routePrefix);
         $this->actions = $needWriteActions ? array('index', 'show', 'new', 'edit', 'delete') : array('index', 'show');
@@ -73,11 +84,17 @@ class DoctrineCrudGenerator extends Generator
         $this->bundle   = $bundle;
         $this->metadata = $metadata;
         $this->context  = $context;
+        $this->savePath = $savePath;
         $this->setFormat($format);
 
         $this->generateControllerClass($forceOverwrite);
 
-        $dir = sprintf('%s/Resources/views/%s', $this->bundle->getPath(), str_replace('\\', '/', $this->entity));
+        $dir = sprintf(
+            '%s/Resources/views/%s/%s',
+            $this->bundle->getPath(),
+            $this->savePath,
+            str_replace('\\', '/', $this->entity)
+        );
 
         if (!file_exists($dir)) {
             $this->filesystem->mkdir($dir, 0777);
@@ -144,6 +161,7 @@ class DoctrineCrudGenerator extends Generator
             'route_name_prefix' => $this->routeNamePrefix,
             'bundle'            => $this->bundle->getName(),
             'entity'            => $this->entity,
+            'save_path'         => $this->savePath,
             'context'           => $this->context,
         ));
     }
@@ -163,7 +181,7 @@ class DoctrineCrudGenerator extends Generator
         $target = sprintf(
             '%s/Controller/%s/%sController.php',
             $dir,
-            str_replace('\\', '/', $entityNamespace),
+            $this->savePath.str_replace('\\', '/', $entityNamespace),
             $entityClass
         );
 
@@ -181,6 +199,7 @@ class DoctrineCrudGenerator extends Generator
             'namespace'         => $this->bundle->getNamespace(),
             'entity_namespace'  => $entityNamespace,
             'format'            => $this->format,
+            'save_path'         => $this->savePath,
             'context'           => $this->context,
         ));
     }
@@ -207,6 +226,7 @@ class DoctrineCrudGenerator extends Generator
             'namespace'         => $this->bundle->getNamespace(),
             'entity_namespace'  => $entityNamespace,
             'actions'           => $this->actions,
+            'save_path'         => $this->savePath,
             'context'           => $this->context,
             'form_type_name'    => strtolower(str_replace('\\', '_', $this->bundle->getNamespace()).($parts ? '_' : '').implode('_', $parts).'_'.$entityClass.'Type'),
         ));
@@ -227,6 +247,7 @@ class DoctrineCrudGenerator extends Generator
             'record_actions'    => $this->getRecordActions(),
             'route_prefix'      => $this->routePrefix,
             'route_name_prefix' => $this->routeNamePrefix,
+            'save_path'         => $this->savePath,
             'context'           => $this->context,
         ));
     }
@@ -245,6 +266,7 @@ class DoctrineCrudGenerator extends Generator
             'actions'           => $this->actions,
             'route_prefix'      => $this->routePrefix,
             'route_name_prefix' => $this->routeNamePrefix,
+            'save_path'         => $this->savePath,
             'context'           => $this->context,
         ));
     }
@@ -262,6 +284,7 @@ class DoctrineCrudGenerator extends Generator
             'route_prefix'      => $this->routePrefix,
             'route_name_prefix' => $this->routeNamePrefix,
             'actions'           => $this->actions,
+            'save_path'         => $this->savePath,
             'context'           => $this->context,
         ));
     }
@@ -279,6 +302,7 @@ class DoctrineCrudGenerator extends Generator
             'entity'            => $this->entity,
             'bundle'            => $this->bundle->getName(),
             'actions'           => $this->actions,
+            'save_path'         => $this->savePath,
             'context'           => $this->context,
         ));
     }

@@ -44,6 +44,7 @@ class GenerateDoctrineCrudCommand extends GenerateDoctrineCommand
                 new InputOption('with-write', '', InputOption::VALUE_NONE, 'Whether or not to generate create, new and delete actions'),
                 new InputOption('format', '', InputOption::VALUE_REQUIRED, 'Use the format for configuration files (php, xml, yml, or annotation)', 'annotation'),
                 new InputOption('overwrite', '', InputOption::VALUE_NONE, 'Do not stop the generation if crud controller already exist, thus overwriting all generated files'),
+                new InputOption('save-path', '', InputOption::VALUE_OPTIONAL, 'Save extra path for controllers and views'),
                 new InputOption('context-file', '', InputOption::VALUE_OPTIONAL, 'Loads a yml file that will be passed to twig as context'),
             ))
             ->setDescription('Generates a CRUD based on a Doctrine entity')
@@ -70,6 +71,8 @@ __project_root__/app/Resources/SensioGeneratorBundle/skeleton/form</info>
 
 You can check https://github.com/sensio/SensioGeneratorBundle/tree/master/Resources/skeleton
 in order to know the file structure of the skeleton
+
+save-path allows you to define an extra sub path where controllers will be stored
 
 context-file allows to load an options file that will be passed to twig as context. This is usefull if you are using custom setSkeletonDirs. This file should be located in:
 
@@ -105,6 +108,7 @@ EOT
         $withWrite = $input->getOption('with-write');
         $forceOverwrite = $input->getOption('overwrite');
         $contextFile = $input->getOption('context-file');
+        $savePath = $input->getOption('save-path');
         $contextData = false;
 
         $dialog->writeSection($output, 'CRUD generation');
@@ -119,7 +123,7 @@ EOT
         }
 
         $generator = $this->getGenerator($bundle);
-        $generator->generate($bundle, $entity, $metadata[0], $format, $prefix, $withWrite, $forceOverwrite, $contextData);
+        $generator->generate($bundle, $entity, $metadata[0], $format, $prefix, $withWrite, $forceOverwrite, $savePath, $contextData);
 
         $output->writeln('Generating the CRUD code: <info>OK</info>');
 
