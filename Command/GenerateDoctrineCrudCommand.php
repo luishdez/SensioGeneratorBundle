@@ -31,6 +31,7 @@ use Sensio\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
 class GenerateDoctrineCrudCommand extends GenerateDoctrineCommand
 {
     private $formGenerator;
+    private $savePath;
 
     /**
      * @see Command
@@ -108,7 +109,7 @@ EOT
         $withWrite = $input->getOption('with-write');
         $forceOverwrite = $input->getOption('overwrite');
         $contextFile = $input->getOption('context-file');
-        $savePath = $input->getOption('save-path');
+        $this->savePath = $input->getOption('save-path');
         $contextData = false;
 
         $dialog->writeSection($output, 'CRUD generation');
@@ -123,7 +124,7 @@ EOT
         }
 
         $generator = $this->getGenerator($bundle);
-        $generator->generate($bundle, $entity, $metadata[0], $format, $prefix, $withWrite, $forceOverwrite, $savePath, $contextData);
+        $generator->generate($bundle, $entity, $metadata[0], $format, $prefix, $withWrite, $forceOverwrite, $this->savePath, $contextData);
 
         $output->writeln('Generating the CRUD code: <info>OK</info>');
 
@@ -271,7 +272,7 @@ EOT
     protected function getFormGenerator($bundle = null)
     {
         if (null === $this->formGenerator) {
-            $this->formGenerator = new DoctrineFormGenerator($this->getContainer()->get('filesystem'));
+            $this->formGenerator = new DoctrineFormGenerator($this->getContainer()->get('filesystem'), $this->savePath);
             $this->formGenerator->setSkeletonDirs($this->getSkeletonDirs($bundle));
         }
 

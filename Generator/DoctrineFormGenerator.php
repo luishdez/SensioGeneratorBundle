@@ -26,15 +26,17 @@ class DoctrineFormGenerator extends Generator
     private $filesystem;
     private $className;
     private $classPath;
+    private $savePath = '';
 
     /**
      * Constructor.
      *
      * @param Filesystem $filesystem A Filesystem instance
      */
-    public function __construct(Filesystem $filesystem)
+    public function __construct(Filesystem $filesystem, $savePath = '')
     {
         $this->filesystem = $filesystem;
+        $this->savePath = $savePath;
     }
 
     public function getClassName()
@@ -60,8 +62,10 @@ class DoctrineFormGenerator extends Generator
         $entityClass = array_pop($parts);
 
         $this->className = $entityClass.'Type';
-        $dirPath         = $bundle->getPath().'/Form';
-        $this->classPath = $dirPath.'/'.str_replace('\\', '/', $entity).'Type.php';
+        $dirPath         = $bundle->getPath().'/Form/'.$this->savePath;
+        $this->classPath = $dirPath.$this->savePath.'/'.str_replace('\\', '/', $entity).'Type.php';
+
+        var_dump($this->savePath);
 
         if (file_exists($this->classPath)) {
             throw new \RuntimeException(sprintf('Unable to generate the %s form class as it already exists under the %s file', $this->className, $this->classPath));
@@ -81,6 +85,7 @@ class DoctrineFormGenerator extends Generator
             'entity_class'     => $entityClass,
             'bundle'           => $bundle->getName(),
             'form_class'       => $this->className,
+            'save_path'        => $this->savePath,
             'form_type_name'   => strtolower(str_replace('\\', '_', $bundle->getNamespace()).($parts ? '_' : '').implode('_', $parts).'_'.substr($this->className, 0, -4)),
         ));
     }
